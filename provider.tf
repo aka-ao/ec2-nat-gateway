@@ -149,3 +149,21 @@ resource "aws_instance" "ec2" {
   echo `hostname` > /var/www/html/index.html
   EOF
 }
+
+
+resource "aws_instance" "public" {
+  ami           = "ami-0bc8ae3ec8e338cbc"
+  instance_type = "t2.micro"
+  subnet_id     = aws_subnet.public-subnet.id
+  key_name      = aws_key_pair.nat-gateway.id
+  tags = {
+    Name = "nat-gateway-ec2-public"
+  }
+  security_groups = [aws_security_group.natgw-sg.id]
+}
+
+resource "aws_eip" "public" {
+  vpc = true
+  instance = aws_instance.public.id
+  depends_on = [aws_instance.public]
+}
